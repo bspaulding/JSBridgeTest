@@ -10,6 +10,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "babel-loader": "6.2.5",
+    "redux": "3.6.0",
     "virtual-dom": "2.1.1",
     "webpack": "1.13.2",
     "webpack-closure-compiler": "2.0.2"
