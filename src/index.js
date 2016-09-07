@@ -1,52 +1,48 @@
 import { diff, h } from "virtual-dom";
-const View = "View";
-const Text = "Text";
+import { Button, Text, View } from "./components/Native";
+import { createStore } from "redux";
 
-function render(count) {
+function reducer(state = 0, action) {
+	switch (action.type) {
+	case "INCREMENT":
+		return state + 1;
+	default:
+		return state;
+	}
+}
+
+const store = createStore(reducer);
+store.subscribe(update);
+
+const increment = () => store.dispatch({ type: "INCREMENT" })
+function App(count) {
 	return (
 		<View>
 			<Text>{count}</Text>
+			<Button onClick={increment}>Increment</Button>
 		</View>
 	);
 }
 
-var count = -1;
-
 var tree;
-function App() {
-	count += 1;
-	console.log(`[App] count: ${count}`);
+function render() {
+	const count = store.getState();
 
-	var newTree = render(count);
+	var newTree = App(count);
 	var patches;
 	if (!tree) {
 		patches = null;
 	} else {
-		console.log("getting diff");
 		try {
-		patches = diff(tree, newTree);
+			patches = diff(tree, newTree);
 		} catch (e) {
 			console.log(e.message);
 			console.log(e);
 		}
-		console.log("got diff");
-		console.log(patches);
 	}
 	tree = newTree;
 
 	return { tree, patches };
 }
 
-function run(fn) {
-	console.log("run! callback:");
-	console.log(fn);
-
-	setInterval(function() {
-		console.log("in interval");
-		fn(App());
-		count += 1;
-	}, 1000);
-}
-
-window.run = run;
-window.App = App;
+window.render = render;
