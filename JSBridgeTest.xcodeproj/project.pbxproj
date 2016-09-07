@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		655FC4D11D7BF31600839B11 /* bundle.js in Resources */ = {isa = PBXBuildFile; fileRef = 655FC4CF1D7BF2BF00839B11 /* bundle.js */; };
 		655FC4D31D7BF8BA00839B11 /* JSRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 655FC4D21D7BF8BA00839B11 /* JSRootView.swift */; };
+		65DA29EB1D7F936F0043C387 /* JSButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65DA29EA1D7F936F0043C387 /* JSButton.swift */; };
 		65E08AD31D7A6C5300AE6985 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E08AD21D7A6C5300AE6985 /* AppDelegate.swift */; };
 		65E08AD51D7A6C5300AE6985 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65E08AD41D7A6C5300AE6985 /* ViewController.swift */; };
 		65E08AD81D7A6C5300AE6985 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 65E08AD61D7A6C5300AE6985 /* Main.storyboard */; };
@@ -95,6 +96,7 @@
 /* Begin PBXFileReference section */
 		655FC4CF1D7BF2BF00839B11 /* bundle.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = bundle.js; path = ../dist/bundle.js; sourceTree = "<group>"; };
 		655FC4D21D7BF8BA00839B11 /* JSRootView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSRootView.swift; sourceTree = "<group>"; };
+		65DA29EA1D7F936F0043C387 /* JSButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSButton.swift; sourceTree = "<group>"; };
 		65E08ACF1D7A6C5300AE6985 /* JSBridgeTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = JSBridgeTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		65E08AD21D7A6C5300AE6985 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		65E08AD41D7A6C5300AE6985 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				65E08ADE1D7A6C5300AE6985 /* Info.plist */,
 				65E08B021D7B476000AE6985 /* UITextField+ArrowKeys.swift */,
 				655FC4D21D7BF8BA00839B11 /* JSRootView.swift */,
+				65DA29EA1D7F936F0043C387 /* JSButton.swift */,
 			);
 			path = JSBridgeTest;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 				655FC4D31D7BF8BA00839B11 /* JSRootView.swift in Sources */,
 				65E08B031D7B476000AE6985 /* UITextField+ArrowKeys.swift in Sources */,
 				65E08AD31D7A6C5300AE6985 /* AppDelegate.swift in Sources */,
+				65DA29EB1D7F936F0043C387 /* JSButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
