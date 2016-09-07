@@ -30,7 +30,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
   override func viewDidLoad() {
     super.viewDidLoad()
 
+    let rootView = JSRootView()
+    rootView.frame = self.view.frame
+    self.view.addSubview(rootView)
+
     context = JSContext()
+    context?.exceptionHandler = { context, exception in
+      print("[JSContext#exceptionHandler] \(exception)")
+    }
+    let update: @convention(block) () -> () = {
+      rootView.update(self.context!, rendererSubscript: "window.render()")
+    }
+    
     context!.setObject(
       unsafeBitCast(fetch, AnyObject.self),
       forKeyedSubscript: "fetch"
@@ -43,6 +54,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
       unsafeBitCast([], AnyObject.self),
       forKeyedSubscript: "window"
     )
+    context!.setObject(
+      unsafeBitCast(update, AnyObject.self),
+      forKeyedSubscript: "update"
+    )
     
     if let sourceURL = NSBundle.mainBundle().URLForResource("bundle", withExtension: "js") {
       let source = try! String(contentsOfURL: sourceURL)
@@ -51,11 +66,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
       print("getting sourceURL failed")
     }
     
-    let rootView = JSRootView()
-    rootView.render(context!, rendererSubscript: "window.App()")
-    rootView.frame = self.view.frame
-    
-    self.view.addSubview(rootView)
+    rootView.render(context!, rendererSubscript: "window.render()")
   }
 
   override func didReceiveMemoryWarning() {
