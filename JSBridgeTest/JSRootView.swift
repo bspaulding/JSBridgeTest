@@ -4,33 +4,25 @@ import UIKit
 class JSRootView: UIView {
   var currentTree: [NSObject : AnyObject]!
 
-  let update: @convention(block) (JSValue) -> () = { raw in
-    let tree = raw.toDictionary()
-    print(tree)
+  var cs: [NSLayoutConstraint] = []
+  func enqueueConstraint(constraint: NSLayoutConstraint) {
+    cs.append(constraint)
+  }
+  func applyConstraints() {
+    self.removeConstraints(self.cs)
+    self.addConstraints(cs)
   }
 
   func render(context: JSContext, rendererSubscript: String) {
-//    context.setObject(
-//      unsafeBitCast(update, AnyObject.self),
-//      forKeyedSubscript: "updater"
-//    )
-//
-//    context.evaluateScript("window.run(updater)")
     let changes = context.evaluateScript(rendererSubscript)
-      .toDictionary() as! [String: AnyObject]
-    create(self, tree: changes["tree"] as! [String: AnyObject])
-    
-    update(context, rendererSubscript: rendererSubscript)
-    update(context, rendererSubscript: rendererSubscript)
-    update(context, rendererSubscript: rendererSubscript)
-    update(context, rendererSubscript: rendererSubscript)
-    update(context, rendererSubscript: rendererSubscript)
+    cs = []
+    create(self, tree: changes.valueForProperty("tree"))
+    applyConstraints()
   }
   
   func update(context: JSContext, rendererSubscript: String) {
     let raw = context.evaluateScript(rendererSubscript)
     let changes2 = raw.toDictionary()
-    print(changes2);
     patch(self, patches: changes2["patches"] as! [String: AnyObject])
   }
 
@@ -68,9 +60,12 @@ class JSRootView: UIView {
 
   private func applyPatches(root: UIView, node: UIView?, patches: AnyObject) -> UIView {
     if let node = node {
-      var newNode : UIView
+//      var newNode : UIView
       if let patches = patches as? [[String: AnyObject]] {
         // handle each patch
+        patches.forEach({ patch in
+          applyPatch(patch, node: node)
+        })
       } else if let patch = patches as? [String: AnyObject] {
         applyPatch(patch, node: node)
       }
@@ -136,7 +131,17 @@ class JSRootView: UIView {
         let nextIndex = rootIndex + count
 
         if indexInRange(indices, left: rootIndex, right: nextIndex) {
-          let childNodes = treeIndexRecurse(subviews[i], tree: child as! [String: AnyObject], indices: indices, nodes: nodes, rootIndex: rootIndex)
+          // TODO: There's a bug here when a patch has multiple children,
+          // subviews.count == 1, && i == 1, so subviews[1] yields an
+          // index out of range exception
+          let childNodes = treeIndexRecurse(
+            subviews[i],
+            tree: child as! [String: AnyObject],
+            indices: indices,
+            nodes: nodes,
+            rootIndex: rootIndex
+          )
+          
           for (k, v) in childNodes {
             nodes[k] = v
           }
@@ -192,31 +197,112 @@ class JSRootView: UIView {
     return indices
   }
 
-  private func create(root: UIView, tree: [String : AnyObject]!) -> () {
-    //print(tree)
-
-    if tree["type"] as! String == "VirtualText" {
-      let textView = root as! UITextView
-      textView.text = tree["text"] as! String
+  private func create(root: UIView, tree: JSValue!) -> () {
+    if tree.valueForProperty("type").toString() == "VirtualText" {
+      let text = tree.valueForProperty("text").toString()
+      if root.isKindOfClass(UITextView) {
+        let textView = root as! UITextView
+        textView.text = text
+      } else if root.isKindOfClass(JSButton) {
+        let button = root as! JSButton
+        button.setTitle(text, forState: .Normal)
+      }
       return
     }
 
     var view : UIView
-    switch tree["tagName"] as! String {
+    switch tree.valueForProperty("tagName").toString() {
     case "TEXT":
       view = UITextView()
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Bottom,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Height,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: nil,
+        attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1.0, constant: 30
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Width,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Width, multiplier: 1.0, constant: 0
+      ))
+    case "BUTTON":
+      view = JSButton(type: .System)
+      view.tag = 1
+      (view as! JSButton).setProps(tree.valueForProperty("properties"))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Top,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.CenterY, multiplier: 1.0, constant: 0
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Height,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: nil,
+        attribute: NSLayoutAttribute.NotAnAttribute, multiplier: 1.0, constant: 30
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Width,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Width, multiplier: 1.0, constant: 0
+      ))
     default:
       view = UIView()
+      view.clipsToBounds = true
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Top,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Top, multiplier: 1.0, constant: 0
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Bottom,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Bottom, multiplier: 1.0, constant: 0
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Left,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Left, multiplier: 1.0, constant: 0
+      ))
+      enqueueConstraint(NSLayoutConstraint(
+        item: view,
+        attribute: NSLayoutAttribute.Right,
+        relatedBy: NSLayoutRelation.Equal,
+        toItem: root,
+        attribute: NSLayoutAttribute.Right, multiplier: 1.0, constant: 0
+      ))
+//      view.backgroundColor = UIColor.redColor()
     }
+    view.translatesAutoresizingMaskIntoConstraints = false
 
-    view.frame = root.frame
     root.addSubview(view)
-    if let children = tree["children"] {
-      let childs = children as! [[String: AnyObject]]
-      childs.forEach({ child in
+    if let children = tree.valueForProperty("children") {
+      let length = children.valueForProperty("length").toNumber() as Int
+      for i in 0..<length {
+        let child = children.objectAtIndexedSubscript(i)
         create(view, tree: child)
-      })
+      }
     }
-    view.sizeToFit()
+    //view.sizeToFit()
   }
 }
