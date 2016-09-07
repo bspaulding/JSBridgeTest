@@ -15,7 +15,6 @@ class JSButton: UIButton {
   }
   
   func onClick(sender: AnyObject?) {
-    print("[JSButton#onClick]")
     if let props = self.properties {
       if props.hasProperty("onClick") {
         props
