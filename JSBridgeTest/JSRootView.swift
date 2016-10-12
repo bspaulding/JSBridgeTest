@@ -214,6 +214,7 @@ class JSRootView: UIView {
     switch tree.valueForProperty("tagName").toString() {
     case "TEXT":
       view = UITextView()
+      (view as! UITextView).textAlignment = .Center;
       enqueueConstraint(NSLayoutConstraint(
         item: view,
         attribute: NSLayoutAttribute.Bottom,
